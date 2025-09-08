@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ChatNow</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="auth">
+    <h2>Enter your username</h2>
+    <input type="text" id="usernameInput" placeholder="Your name">
+    <button id="joinBtn">Join Chat</button>
+  </div>
+
+  <div id="chat" style="display:none;">
+    <div class="app">
+      <aside class="sidebar">
+        <h2>ChatNow</h2>
+        <ul class="channel-list" id="channelList">
+          <li data-channel="general">general</li>
+          <li data-channel="random">random</li>
+        </ul>
+        <ul class="user-list" id="userList"></ul>
+      </aside>
+      <div class="chat-container">
+        <header class="chat-header"># general</header>
+        <div id="messages"></div>
+        <div id="typingIndicator"></div>
+        <form id="form">
+          <input id="input" autocomplete="off" placeholder="Message #general..." />
+          <button>Send</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
