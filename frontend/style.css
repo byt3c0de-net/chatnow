@@ -80,9 +80,10 @@ body, html {
   display: flex;
   flex-direction: column;
   max-width: 70%;
-  word-wrap: break-word;   /* wrap long words */
-  overflow-wrap: break-word; /* for very long unbroken text */
-  white-space: pre-wrap;
+  word-wrap: break-word;       /* wrap normal words */
+  overflow-wrap: anywhere;      /* wrap long words / no spaces */
+  word-break: break-all;        /* break extremely long strings */
+  white-space: pre-wrap;        /* preserve line breaks */
   background: #40444b;
   padding: 8px 12px;
   border-radius: 8px;
@@ -92,16 +93,16 @@ body, html {
 
 /* Username + timestamp */
 .message .username-label {
-  font-size: 11px;       /* smaller */
+  font-size: 11px;
   font-weight: bold;
-  color: #666;           /* darker */
+  color: #666;
   margin-bottom: 2px;
   display: block;
 }
 
 .message .timestamp {
   font-size: 10px;
-  color: #555;           /* darker than bubble text */
+  color: #555;
   margin-top: 2px;
   align-self: flex-end;
 }
@@ -111,6 +112,7 @@ body, html {
   background: #5865f2;
   color: #fff;
 }
+
 /* Input form */
 form {
   display: flex;
@@ -151,4 +153,5 @@ button:hover {
 button.too-long {
   background: #d83c3e;
 }
+
 
