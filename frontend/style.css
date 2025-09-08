@@ -18,6 +18,7 @@ body, html {
 /* Sidebar */
 .sidebar {
   width: 240px;
+  flex-shrink: 0;          /* prevent shrinking */
   background: #202225;
   padding: 15px;
   box-sizing: border-box;
@@ -52,10 +53,12 @@ body, html {
 
 /* Chat container */
 .chat-container {
-  flex-grow: 1;
+  flex-grow: 1;             /* fill remaining space */
+  flex-shrink: 1;           /* allow shrinking if needed */
   display: flex;
   flex-direction: column;
   background: #36393f;
+  min-width: 0;             /* important: allow internal overflow without stretching parent */
 }
 
 .chat-header {
@@ -153,5 +156,6 @@ button:hover {
 button.too-long {
   background: #d83c3e;
 }
+
 
 
