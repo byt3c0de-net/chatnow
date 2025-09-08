@@ -2,13 +2,16 @@
 // app.js
 // ----------------------------
 
+// Get token and username from localStorage
 const token = localStorage.getItem('token');
 const username = localStorage.getItem('username');
 
+// Redirect to login page if not logged in
 if (!token || !username) {
-  window.location.href = '/login.html'; // redirect if not logged in
+  window.location.href = '/login.html';
 }
 
+// Initialize Socket.IO with JWT auth
 const socket = io({
   auth: { token }
 });
@@ -27,15 +30,16 @@ let typingTimeout;
 // Handle connection errors
 socket.on('connect_error', (err) => {
   console.error('Socket.IO connection error:', err.message);
+  alert('Connection error. Please refresh the page.');
 });
 
-// Helper to get HH:MM time
+// Helper: get HH:MM time
 function getTime() {
   const d = new Date();
   return d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0');
 }
 
-// Add message
+// Add message to chat
 function addMessage(msgObj) {
   const wrapper = document.createElement('div');
   wrapper.classList.add('message');
@@ -55,7 +59,7 @@ function addMessage(msgObj) {
   messages.scrollTop = messages.scrollHeight;
 }
 
-// Chat history
+// Display chat history
 socket.on('chat history', history => {
   messages.innerHTML = '';
   history.forEach(msgObj => addMessage(msgObj));
@@ -64,18 +68,18 @@ socket.on('chat history', history => {
 // Incoming messages
 socket.on('chat message', msgObj => addMessage(msgObj));
 
-// Typing
+// Typing indicators
 input.addEventListener('input', () => {
   socket.emit('typing', username);
   clearTimeout(typingTimeout);
   typingTimeout = setTimeout(() => socket.emit('stop typing', username), 1000);
 
-  if(input.value.length > 1000) button.classList.add('too-long');
+  if (input.value.length > 1000) button.classList.add('too-long');
   else button.classList.remove('too-long');
 });
 
-socket.on('typing', user => { 
-  typingDiv.textContent = user !== username ? `${user} is typing...` : ''; 
+socket.on('typing', user => {
+  typingDiv.textContent = user !== username ? `${user} is typing...` : '';
 });
 socket.on('stop typing', () => typingDiv.textContent = '');
 
@@ -83,17 +87,20 @@ socket.on('stop typing', () => typingDiv.textContent = '');
 form.addEventListener('submit', e => {
   e.preventDefault();
   const message = input.value.trim();
-  if(!message) return;
-  if(message.length > 1000){ button.classList.add('too-long'); return; }
+  if (!message) return;
+  if (message.length > 1000) { 
+    button.classList.add('too-long'); 
+    return; 
+  }
 
   socket.emit('chat message', { username, message, channel: currentChannel, time: getTime() });
   input.value = '';
   button.classList.remove('too-long');
 });
 
-// Channels
+// Channel switching
 channelList.addEventListener('click', e => {
-  if(e.target.tagName === 'LI') {
+  if (e.target.tagName === 'LI') {
     currentChannel = e.target.dataset.channel;
     document.querySelector('.chat-header').textContent = `# ${currentChannel}`;
     messages.innerHTML = '';
@@ -101,7 +108,7 @@ channelList.addEventListener('click', e => {
   }
 });
 
-// Online users
+// Online users list
 socket.on('update users', users => {
   userList.innerHTML = '';
   users.forEach(u => {
