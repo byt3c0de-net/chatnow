@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Register - ChatNow</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="auth-container">
+  <h2>Register</h2>
+  <form id="registerForm">
+    <input type="email" id="email" placeholder="Email" required>
+    <input type="password" id="password" placeholder="Password" required>
+    <button>Register</button>
+  </form>
+  <p id="message"></p>
+  <a href="login.html">Already have an account? Login</a>
+</div>
+
+<script>
+const form = document.getElementById('registerForm');
+const message = document.getElementById('message');
+
+form.addEventListener('submit', async e => {
+  e.preventDefault();
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value.trim();
+
+  const res = await fetch('/auth/register', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password })
+  });
+
+  const data = await res.json();
+  if(res.ok) {
+    message.textContent = 'Verification code sent! Check your email.';
+    // Redirect to verify page or prompt for code here
+  } else {
+    message.textContent = data.error || 'Registration failed';
+  }
+});
+</script>
+</body>
+</html>
