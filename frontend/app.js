@@ -21,25 +21,21 @@ function getTime() {
   return d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0');
 }
 
-// Add message
+// Add message as bubble
 function addMessage(msgObj) {
   const wrapper = document.createElement('div');
   wrapper.classList.add('message');
-  if(msgObj.username === username) wrapper.classList.add('my-message');
+  wrapper.classList.add(msgObj.username === username ? 'my-message' : 'other-message');
 
-  const label = document.createElement('span');
-  label.classList.add('username-label');
-  label.textContent = msgObj.username;
-  wrapper.appendChild(label);
+  const meta = document.createElement('div');
+  meta.classList.add('meta');
+  meta.textContent = `${msgObj.username} • ${msgObj.time || getTime()}`;
+  wrapper.appendChild(meta);
 
-  const text = document.createElement('span');
-  text.textContent = msgObj.message;
-  wrapper.appendChild(text);
-
-  const ts = document.createElement('span');
-  ts.classList.add('timestamp');
-  ts.textContent = msgObj.time || getTime();
-  wrapper.appendChild(ts);
+  const bubble = document.createElement('div');
+  bubble.classList.add('bubble');
+  bubble.textContent = msgObj.message;
+  wrapper.appendChild(bubble);
 
   messages.appendChild(wrapper);
   messages.scrollTop = messages.scrollHeight;
@@ -64,7 +60,9 @@ input.addEventListener('input', () => {
   else button.classList.remove('too-long');
 });
 
-socket.on('typing', user => { typingDiv.textContent = user !== username ? `${user} is typing...` : ''; });
+socket.on('typing', user => { 
+  typingDiv.textContent = user !== username ? `${user} is typing...` : ''; 
+});
 socket.on('stop typing', () => typingDiv.textContent = '');
 
 // Send message
@@ -96,6 +94,8 @@ socket.on('update users', users => {
     const li = document.createElement('li');
     li.textContent = u;
     li.style.color = u === username ? '#fff' : '#b9bbbe';
+    li.style.position = 'relative';
+    li.style.paddingLeft = '12px';
 
     const dot = document.createElement('span');
     dot.style.width = '8px';
