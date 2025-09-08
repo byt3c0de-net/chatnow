@@ -12,12 +12,12 @@ const io = new Server(server);
 const PORT = process.env.PORT || 3000;  // Render sets PORT
 const MESSAGE_FILE = path.join(__dirname, 'messages.json');
 
-// Serve static files (CSS/JS)
-app.use('/frontend', express.static(path.join(__dirname, '../frontend')));
+// Serve static files (everything inside frontend/)
+app.use(express.static(path.join(__dirname, '../frontend')));
 
-// Serve index.html
+// Serve index.html from frontend/
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../index.html'));
+  res.sendFile(path.join(__dirname, '../frontend/index.html'));
 });
 
 // Ensure message file exists
