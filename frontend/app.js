@@ -2,37 +2,39 @@ const socket = io();
 const form = document.getElementById('form');
 const input = document.getElementById('input');
 const messages = document.getElementById('messages');
+const userList = document.getElementById('userList');
 
-// Ask for username
 let username = '';
 while (!username) {
-    username = prompt('Enter your username:').trim();
+  username = prompt('Enter your username:').trim();
 }
 
 // Add message to chat
 function addMessage(msgObj) {
-    const item = document.createElement('li');
-    item.textContent = msgObj.message;
+  const msgDiv = document.createElement('div');
+  msgDiv.classList.add('message');
+  if (msgObj.username === username) {
+    msgDiv.classList.add('my-message');
+  }
 
-    // Assign class based on user
-    if (msgObj.username === username) {
-        item.classList.add('my-message');
-    } else {
-        item.classList.add('other-message');
-        // Add username label
-        const label = document.createElement('span');
-        label.textContent = msgObj.username;
-        label.classList.add('username-label');
-        item.prepend(label);
-    }
+  const meta = document.createElement('div');
+  meta.classList.add('meta');
+  const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  meta.textContent = `${msgObj.username} • ${time}`;
 
-    messages.appendChild(item);
-    messages.scrollTop = messages.scrollHeight;
+  const bubble = document.createElement('div');
+  bubble.classList.add('bubble');
+  bubble.textContent = msgObj.message;
+
+  msgDiv.appendChild(meta);
+  msgDiv.appendChild(bubble);
+  messages.appendChild(msgDiv);
+  messages.scrollTop = messages.scrollHeight;
 }
 
-// Display chat history
+// Chat history
 socket.on('chat history', (history) => {
-    history.forEach(msgObj => addMessage(msgObj));
+  history.forEach(msgObj => addMessage(msgObj));
 });
 
 // Receive new messages
@@ -40,10 +42,10 @@ socket.on('chat message', (msgObj) => addMessage(msgObj));
 
 // Send messages
 form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const message = input.value.trim();
-    if (message) {
-        socket.emit('chat message', { username, message });
-        input.value = '';
-    }
+  e.preventDefault();
+  const message = input.value.trim();
+  if (message) {
+    socket.emit('chat message', { username, message });
+    input.value = '';
+  }
 });
