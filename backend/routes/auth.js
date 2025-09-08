@@ -7,7 +7,7 @@ const User = require('../models/User');
 
 const router = express.Router();
 
-// Email transporter (Gmail App Password)
+// Email transporter (Gmail with App Password)
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
@@ -16,12 +16,19 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-// Register
+// -------------------- REGISTER --------------------
 router.post('/register', async (req, res) => {
-  const { email, password } = req.body;
   try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password are required' });
+    }
+
     const existing = await User.findOne({ email });
-    if (existing) return res.status(400).json({ error: 'User already exists' });
+    if (existing) {
+      return res.status(400).json({ error: 'User already exists' });
+    }
 
     const hashed = await bcrypt.hash(password, 10);
     const code = Math.floor(100000 + Math.random() * 900000).toString();
@@ -29,10 +36,13 @@ router.post('/register', async (req, res) => {
     const user = new User({
       email,
       password: hashed,
-      verificationCode: code
+      verificationCode: code,
+      verified: false
     });
+
     await user.save();
 
+    // Send verification email
     await transporter.sendMail({
       from: `"ChatNow" <${process.env.EMAIL_USER}>`,
       to: email,
@@ -40,17 +50,18 @@ router.post('/register', async (req, res) => {
       text: `Your verification code is: ${code}`
     });
 
-    res.json({ message: 'Verification code sent to email' });
+    return res.status(201).json({ message: 'Verification code sent to email' });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Server error' });
+    console.error('❌ Error in /register:', err);
+    return res.status(500).json({ error: 'Server error', details: err.message });
   }
 });
 
-// Verify
+// -------------------- VERIFY --------------------
 router.post('/verify', async (req, res) => {
-  const { email, code } = req.body;
   try {
+    const { email, code } = req.body;
+
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ error: 'User not found' });
     if (user.verified) return res.status(400).json({ error: 'Already verified' });
@@ -60,17 +71,18 @@ router.post('/verify', async (req, res) => {
     user.verificationCode = undefined;
     await user.save();
 
-    res.json({ message: 'Account verified. You can now log in.' });
+    return res.json({ message: 'Account verified. You can now log in.' });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Server error' });
+    console.error('❌ Error in /verify:', err);
+    return res.status(500).json({ error: 'Server error', details: err.message });
   }
 });
 
-// Login
+// -------------------- LOGIN --------------------
 router.post('/login', async (req, res) => {
-  const { email, password } = req.body;
   try {
+    const { email, password } = req.body;
+
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ error: 'Invalid credentials' });
     if (!user.verified) return res.status(400).json({ error: 'Please verify your email first' });
@@ -80,10 +92,10 @@ router.post('/login', async (req, res) => {
 
     const token = jwt.sign({ email: user.email }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
-    res.json({ token, username: user.email });
+    return res.json({ token, username: user.email });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Server error' });
+    console.error('❌ Error in /login:', err);
+    return res.status(500).json({ error: 'Server error', details: err.message });
   }
 });
 
