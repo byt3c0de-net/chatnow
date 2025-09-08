@@ -1,18 +1,31 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Chat App</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ChatNow</title>
+  <link rel="stylesheet" href="frontend/style.css">
 </head>
 <body>
-  <div class="chat-container">
-    <ul id="messages"></ul>
-    <form id="form">
-      <input id="input" autocomplete="off" placeholder="Type a message..." />
-      <button>Send</button>
-    </form>
+  <div class="app">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <h2>ChatNow</h2>
+      <ul class="user-list" id="userList"></ul>
+    </aside>
+
+    <!-- Main Chat -->
+    <div class="chat-container">
+      <header class="chat-header"># general</header>
+      <main id="messages"></main>
+      <form id="form">
+        <input id="input" autocomplete="off" placeholder="Message #general..." />
+        <button>Send</button>
+      </form>
+    </div>
   </div>
+
   <script src="/socket.io/socket.io.js"></script>
-  <script src="app.js"></script>
+  <script src="frontend/app.js"></script>
 </body>
 </html>
