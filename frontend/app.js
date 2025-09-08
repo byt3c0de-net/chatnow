@@ -2,37 +2,49 @@ const socket = io();
 const form = document.getElementById('form');
 const input = document.getElementById('input');
 const messages = document.getElementById('messages');
-const userList = document.getElementById('userList');
+const button = form.querySelector('button');
 
+// Ask for username
 let username = '';
 while (!username) {
   username = prompt('Enter your username:').trim();
 }
 
+// Get current time in HH:MM format
+function getTime() {
+  const d = new Date();
+  return d.getHours().toString().padStart(2,'0') + ':' +
+         d.getMinutes().toString().padStart(2,'0');
+}
+
 // Add message to chat
 function addMessage(msgObj) {
-  const msgDiv = document.createElement('div');
-  msgDiv.classList.add('message');
-  if (msgObj.username === username) {
-    msgDiv.classList.add('my-message');
-  }
+  const wrapper = document.createElement('div');
+  wrapper.classList.add('message');
+  if (msgObj.username === username) wrapper.classList.add('my-message');
 
-  const meta = document.createElement('div');
-  meta.classList.add('meta');
-  const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  meta.textContent = `${msgObj.username} • ${time}`;
+  // Username label
+  const label = document.createElement('span');
+  label.textContent = msgObj.username;
+  label.classList.add('username-label');
+  wrapper.appendChild(label);
 
-  const bubble = document.createElement('div');
-  bubble.classList.add('bubble');
-  bubble.textContent = msgObj.message;
+  // Message text
+  const text = document.createElement('span');
+  text.textContent = msgObj.message;
+  wrapper.appendChild(text);
 
-  msgDiv.appendChild(meta);
-  msgDiv.appendChild(bubble);
-  messages.appendChild(msgDiv);
+  // Timestamp
+  const ts = document.createElement('span');
+  ts.textContent = msgObj.time || getTime();
+  ts.classList.add('timestamp');
+  wrapper.appendChild(ts);
+
+  messages.appendChild(wrapper);
   messages.scrollTop = messages.scrollHeight;
 }
 
-// Chat history
+// Display chat history
 socket.on('chat history', (history) => {
   history.forEach(msgObj => addMessage(msgObj));
 });
@@ -44,8 +56,23 @@ socket.on('chat message', (msgObj) => addMessage(msgObj));
 form.addEventListener('submit', (e) => {
   e.preventDefault();
   const message = input.value.trim();
-  if (message) {
-    socket.emit('chat message', { username, message });
-    input.value = '';
+  if (!message) return;
+
+  if (message.length > 1000) {
+    button.classList.add('too-long');
+    return; // prevent sending
+  }
+
+  socket.emit('chat message', { username, message, time: getTime() });
+  input.value = '';
+  button.classList.remove('too-long');
+});
+
+// Input length check
+input.addEventListener('input', () => {
+  if (input.value.length > 1000) {
+    button.classList.add('too-long');
+  } else {
+    button.classList.remove('too-long');
   }
 });
