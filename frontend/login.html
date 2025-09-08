@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login - ChatNow</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="auth-container">
+  <h2>Login</h2>
+  <form id="loginForm">
+    <input type="email" id="email" placeholder="Email" required>
+    <input type="password" id="password" placeholder="Password" required>
+    <button>Login</button>
+  </form>
+  <p id="message"></p>
+  <a href="register.html">Don't have an account? Register</a>
+</div>
+
+<script>
+const form = document.getElementById('loginForm');
+const message = document.getElementById('message');
+
+form.addEventListener('submit', async e => {
+  e.preventDefault();
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value.trim();
+
+  const res = await fetch('/auth/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password })
+  });
+
+  const data = await res.json();
+  if(res.ok) {
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('username', email);
+    window.location.href = '/'; // go to chat page
+  } else {
+    message.textContent = data.error || 'Login failed';
+  }
+});
+</script>
+</body>
+</html>
