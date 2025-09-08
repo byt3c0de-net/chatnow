@@ -1,95 +1,138 @@
-/* Full screen layout */
-html, body {
+/* Global */
+body, html {
+  margin: 0;
+  padding: 0;
   height: 100%;
-  width: 100%;
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background-color: #f2f2f2;
+  font-family: "Segoe UI", sans-serif;
+  background: #2f3136;
+  color: #dcddde;
 }
 
-.chat-container {
+/* App Layout */
+.app {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 240px;
+  background: #202225;
+  padding: 15px;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  height: 100vh;       /* full viewport height */
-  width: 100vw;        /* full viewport width */
-  background: white;
 }
 
-/* Messages area */
-#messages {
+.sidebar h2 {
+  color: #fff;
+  font-size: 18px;
+  margin-bottom: 20px;
+}
+
+.user-list {
   list-style: none;
-  padding: 10px;
+  padding: 0;
   margin: 0;
-  flex-grow: 1;          
-  overflow-y: auto;      
+  flex-grow: 1;
+}
+
+.user-list li {
+  padding: 8px;
+  color: #b9bbbe;
+  font-size: 14px;
+  border-radius: 4px;
+}
+
+.user-list li:hover {
+  background: #36393f;
+  cursor: pointer;
+}
+
+/* Chat container */
+.chat-container {
+  flex-grow: 1;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end; /* push messages to bottom */
+  background: #36393f;
 }
 
-#messages li {
+.chat-header {
+  padding: 15px;
+  font-size: 16px;
+  font-weight: bold;
+  border-bottom: 1px solid #202225;
+  color: #fff;
+}
+
+#messages {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Message Bubbles */
+.message {
+  display: flex;
+  flex-direction: column;
+}
+
+.message .meta {
+  font-size: 12px;
+  color: #72767d;
+  margin-bottom: 2px;
+}
+
+.message .bubble {
+  background: #40444b;
   padding: 8px 12px;
-  margin: 5px;
-  border-radius: 20px;
-  max-width: 80%;
-  word-wrap: break-word;
-  display: inline-block;
+  border-radius: 8px;
+  max-width: 70%;
+  color: #dcddde;
 }
 
-/* Your messages */
-.my-message {
-  background: #4CAF50;
-  color: white;
+.my-message .bubble {
+  background: #5865f2; /* Discord blurple */
+  color: #fff;
   align-self: flex-end;
 }
 
-/* Other users' messages */
-.other-message {
-  background: #e5e5e5;
-  color: black;
-  align-self: flex-start;
-}
-
-/* Username label for other messages */
-.username-label {
-  font-weight: bold;
-  display: block;
-  margin-bottom: 2px;
-  font-size: 0.8em;
-}
-
-/* Input form at the bottom */
+/* Input form */
 form {
   display: flex;
-  padding: 10px;
-  border-top: 1px solid #ccc;
-  background: #fafafa;
+  padding: 15px;
+  border-top: 1px solid #202225;
+  background: #40444b;
 }
 
 #input {
   flex-grow: 1;
-  border: 1px solid #ccc;
-  border-radius: 20px;
-  padding: 10px 15px;
-  font-size: 16px;
+  padding: 10px;
+  border: none;
+  border-radius: 6px;
+  background: #303339;
+  color: #fff;
+  font-size: 14px;
+}
+
+#input:focus {
   outline: none;
 }
 
 button {
   margin-left: 10px;
-  padding: 10px 20px;
+  padding: 0 20px;
   border: none;
-  background: #4CAF50;
-  color: white;
-  border-radius: 20px;
+  border-radius: 6px;
+  background: #5865f2;
+  color: #fff;
   cursor: pointer;
 }
 
 button:hover {
-  background: #45a049;
-}
-
-/* Smooth scroll for messages */
-#messages {
-  scroll-behavior: smooth;
+  background: #4752c4;
 }
