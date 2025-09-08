@@ -31,9 +31,17 @@ function setupSocket() {
   const typingDiv = document.getElementById('typingIndicator');
   const userList = document.getElementById('userList');
   const channelList = document.getElementById('channelList');
+  
+  // Create online users counter
+  const onlineCounter = document.createElement('div');
+  onlineCounter.id = 'onlineCount';
+  onlineCounter.style.padding = '5px 0';
+  onlineCounter.style.fontSize = '12px';
+  onlineCounter.style.color = '#b9bbbe';
+  userList.parentElement.insertBefore(onlineCounter, userList);
+
   const button = form.querySelector('button'); // Send button
 
-  // Helper
   function getTime() {
     const d = new Date();
     return d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0');
@@ -73,6 +81,8 @@ function setupSocket() {
 
   socket.on('update users', users => {
     userList.innerHTML = '';
+    onlineCounter.textContent = `Online Users: ${users.length}`;
+
     users.forEach(u => {
       const li = document.createElement('li');
       li.textContent = u;
@@ -105,7 +115,7 @@ function setupSocket() {
     else button.classList.remove('too-long');
   });
 
-  // Send message with character limit
+  // Send message with 1000-char limit
   form.addEventListener('submit', e => {
     e.preventDefault();
     const message = input.value.trim();
@@ -113,7 +123,8 @@ function setupSocket() {
 
     if (message.length > 1000) {
       button.classList.add('too-long');
-      return; // prevent sending
+      alert('Message cannot exceed 1000 characters.');
+      return;
     }
 
     socket.emit('chat message', { username, message, channel: currentChannel, time: getTime() });
