@@ -1,0 +1,95 @@
+/* Full screen layout */
+html, body {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: #f2f2f2;
+}
+
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;       /* full viewport height */
+  width: 100vw;        /* full viewport width */
+  background: white;
+}
+
+/* Messages area */
+#messages {
+  list-style: none;
+  padding: 10px;
+  margin: 0;
+  flex-grow: 1;          
+  overflow-y: auto;      
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end; /* push messages to bottom */
+}
+
+#messages li {
+  padding: 8px 12px;
+  margin: 5px;
+  border-radius: 20px;
+  max-width: 80%;
+  word-wrap: break-word;
+  display: inline-block;
+}
+
+/* Your messages */
+.my-message {
+  background: #4CAF50;
+  color: white;
+  align-self: flex-end;
+}
+
+/* Other users' messages */
+.other-message {
+  background: #e5e5e5;
+  color: black;
+  align-self: flex-start;
+}
+
+/* Username label for other messages */
+.username-label {
+  font-weight: bold;
+  display: block;
+  margin-bottom: 2px;
+  font-size: 0.8em;
+}
+
+/* Input form at the bottom */
+form {
+  display: flex;
+  padding: 10px;
+  border-top: 1px solid #ccc;
+  background: #fafafa;
+}
+
+#input {
+  flex-grow: 1;
+  border: 1px solid #ccc;
+  border-radius: 20px;
+  padding: 10px 15px;
+  font-size: 16px;
+  outline: none;
+}
+
+button {
+  margin-left: 10px;
+  padding: 10px 20px;
+  border: none;
+  background: #4CAF50;
+  color: white;
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #45a049;
+}
+
+/* Smooth scroll for messages */
+#messages {
+  scroll-behavior: smooth;
+}
