@@ -9,20 +9,26 @@ const io = new Server(server, { cors: { origin: '*' } });
 
 const PORT = process.env.PORT || 3000;
 
-// Serve frontend
 app.use(express.static(path.join(__dirname, '../frontend')));
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, '../frontend/index.html')));
 
-const onlineUsers = new Set();
+// --- CHAT DATA ---
 const messagesByChannel = { general: [], random: [] };
+const onlineUsers = {}; // socket.id → username
 
 io.on('connection', socket => {
   console.log('User connected');
 
-  socket.on('join channel', channel => {
+  // Listen for join
+  socket.on('join channel', ({ channel, username }) => {
+    socket.username = username;
+    onlineUsers[socket.id] = username;
     socket.join(channel);
+
     if (!messagesByChannel[channel]) messagesByChannel[channel] = [];
     socket.emit('chat history', messagesByChannel[channel]);
+
+    io.emit('update users', Object.values(onlineUsers)); // update everyone
   });
 
   socket.on('chat message', msg => {
@@ -35,8 +41,11 @@ io.on('connection', socket => {
   socket.on('typing', user => socket.broadcast.emit('typing', user));
   socket.on('stop typing', user => socket.broadcast.emit('stop typing', user));
 
-  // Add/remove online users using socket.id
-  socket.on('disconnect', () => console.log('User disconnected'));
+  socket.on('disconnect', () => {
+    delete onlineUsers[socket.id];
+    io.emit('update users', Object.values(onlineUsers));
+    console.log('User disconnected');
+  });
 });
 
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
