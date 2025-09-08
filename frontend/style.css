@@ -80,7 +80,8 @@ body, html {
   display: flex;
   flex-direction: column;
   max-width: 70%;
-  word-wrap: break-word;
+  word-wrap: break-word;   /* wrap long words */
+  overflow-wrap: break-word; /* for very long unbroken text */
   white-space: pre-wrap;
   background: #40444b;
   padding: 8px 12px;
@@ -89,20 +90,27 @@ body, html {
   align-self: flex-start;
 }
 
+/* Username + timestamp */
 .message .username-label {
-  font-size: 12px;
+  font-size: 11px;       /* smaller */
   font-weight: bold;
-  color: #aaa;
-  margin-bottom: 3px;
+  color: #666;           /* darker */
+  margin-bottom: 2px;
   display: block;
 }
 
-/* Self messages style (still left but different color) */
+.message .timestamp {
+  font-size: 10px;
+  color: #555;           /* darker than bubble text */
+  margin-top: 2px;
+  align-self: flex-end;
+}
+
+/* Self messages style */
 .my-message {
   background: #5865f2;
   color: #fff;
 }
-
 /* Input form */
 form {
   display: flex;
@@ -143,3 +151,4 @@ button:hover {
 button.too-long {
   background: #d83c3e;
 }
+
