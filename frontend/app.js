@@ -1,4 +1,18 @@
-const socket = io();
+// ----------------------------
+// app.js
+// ----------------------------
+
+const token = localStorage.getItem('token');
+const username = localStorage.getItem('username');
+
+if (!token || !username) {
+  window.location.href = '/login.html'; // redirect if not logged in
+}
+
+const socket = io({
+  auth: { token }
+});
+
 const form = document.getElementById('form');
 const input = document.getElementById('input');
 const messages = document.getElementById('messages');
@@ -7,13 +21,13 @@ const typingDiv = document.getElementById('typingIndicator');
 const userList = document.getElementById('userList');
 const channelList = document.getElementById('channelList');
 
-let username = '';
-while (!username) username = prompt('Enter your username:').trim();
-
 let currentChannel = 'general';
 let typingTimeout;
 
-socket.emit('new user', username);
+// Handle connection errors
+socket.on('connect_error', (err) => {
+  console.error('Socket.IO connection error:', err.message);
+});
 
 // Helper to get HH:MM time
 function getTime() {
@@ -21,7 +35,7 @@ function getTime() {
   return d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0');
 }
 
-// Add message as bubble
+// Add message
 function addMessage(msgObj) {
   const wrapper = document.createElement('div');
   wrapper.classList.add('message');
@@ -111,3 +125,7 @@ socket.on('update users', users => {
     userList.appendChild(li);
   });
 });
+
+// Join initial channel
+socket.emit('join channel', currentChannel);
+document.querySelector('.chat-header').textContent = `# ${currentChannel}`;
