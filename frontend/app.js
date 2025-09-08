@@ -6,7 +6,6 @@ const joinBtn = document.getElementById('joinBtn');
 let username;
 let currentChannel = 'general';
 let typingTimeout;
-
 let socket;
 
 joinBtn.addEventListener('click', () => {
@@ -17,10 +16,7 @@ joinBtn.addEventListener('click', () => {
   chatDiv.style.display = 'block';
 
   socket = io();
-
-  // Join initial channel
   socket.emit('join channel', currentChannel);
-
   setupSocket();
 });
 
@@ -31,16 +27,8 @@ function setupSocket() {
   const typingDiv = document.getElementById('typingIndicator');
   const userList = document.getElementById('userList');
   const channelList = document.getElementById('channelList');
-  
-  // Create online users counter
-  const onlineCounter = document.createElement('div');
-  onlineCounter.id = 'onlineCount';
-  onlineCounter.style.padding = '5px 0';
-  onlineCounter.style.fontSize = '12px';
-  onlineCounter.style.color = '#b9bbbe';
-  userList.parentElement.insertBefore(onlineCounter, userList);
-
-  const button = form.querySelector('button'); // Send button
+  const button = form.querySelector('button');
+  const onlineCounter = document.getElementById('onlineCount');
 
   function getTime() {
     const d = new Date();
@@ -77,6 +65,7 @@ function setupSocket() {
   socket.on('typing', user => { 
     typingDiv.textContent = user !== username ? `${user} is typing...` : ''; 
   });
+
   socket.on('stop typing', () => typingDiv.textContent = '');
 
   socket.on('update users', users => {
@@ -105,7 +94,7 @@ function setupSocket() {
     });
   });
 
-  // Typing + character limit
+  // Typing + 1000-char limit
   input.addEventListener('input', () => {
     socket.emit('typing', username);
     clearTimeout(typingTimeout);
@@ -115,7 +104,6 @@ function setupSocket() {
     else button.classList.remove('too-long');
   });
 
-  // Send message with 1000-char limit
   form.addEventListener('submit', e => {
     e.preventDefault();
     const message = input.value.trim();
