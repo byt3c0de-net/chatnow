@@ -5,20 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ChatNow</title>
   <link rel="stylesheet" href="style.css">
-  <style>
-    /* Optional small tweak for sidebar scroll */
-    .sidebar {
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-      overflow-y: auto;
-    }
-    #onlineCount {
-      font-size: 12px;
-      color: #b9bbbe;
-      padding: 5px 0;
-    }
-  </style>
 </head>
 <body>
   <div id="auth">
@@ -31,13 +17,11 @@
     <div class="app">
       <aside class="sidebar">
         <h2>ChatNow</h2>
-        
         <!-- Channels -->
         <ul class="channel-list" id="channelList">
           <li data-channel="general">general</li>
           <li data-channel="random">random</li>
         </ul>
-
         <!-- Online Users -->
         <div id="onlineCount">Online Users: 0</div>
         <ul class="user-list" id="userList"></ul>
