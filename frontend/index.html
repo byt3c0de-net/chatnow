@@ -7,30 +7,34 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="app">
-    <!-- Sidebar -->
-    <aside class="sidebar">
-      <h2>ChatNow</h2>
+  <div id="auth">
+    <h2>Register / Login</h2>
+    <input type="email" id="email" placeholder="Email">
+    <input type="password" id="password" placeholder="Password">
+    <button id="registerBtn">Register</button>
+    <button id="loginBtn">Login</button>
 
-      <!-- Channels -->
-      <ul class="channel-list" id="channelList">
-        <li data-channel="general"># general</li>
-        <li data-channel="random"># random</li>
-      </ul>
+    <div id="verifyDiv" style="display:none;">
+      <input type="text" id="code" placeholder="Verification code">
+      <button id="verifyBtn">Verify</button>
+    </div>
+    <p id="status"></p>
+  </div>
 
-      <!-- Users -->
-      <ul class="user-list" id="userList"></ul>
-    </aside>
-
-    <!-- Main Chat -->
-    <div class="chat-container">
-      <header class="chat-header"># general</header>
-      <main id="messages"></main>
-      <div id="typingIndicator"></div>
-      <form id="form">
-        <input id="input" autocomplete="off" placeholder="Message #general..." />
-        <button type="submit">Send</button>
-      </form>
+  <div id="chat" style="display:none;">
+    <div class="app">
+      <aside class="sidebar">
+        <h2>ChatNow</h2>
+        <ul class="user-list" id="userList"></ul>
+      </aside>
+      <div class="chat-container">
+        <header class="chat-header"># general</header>
+        <main id="messages"></main>
+        <form id="form">
+          <input id="input" autocomplete="off" placeholder="Message #general..." />
+          <button>Send</button>
+        </form>
+      </div>
     </div>
   </div>
 
