@@ -2,57 +2,54 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
-const fs = require('fs');
-const os = require('os');
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-const PORT = process.env.PORT || 3000;  // Render sets PORT
-const MESSAGE_FILE = path.join(__dirname, 'messages.json');
+const PORT = 3000;
 
-// Serve static files (everything inside frontend/)
+// Serve frontend
 app.use(express.static(path.join(__dirname, '../frontend')));
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, '../index.html')));
 
-// Serve index.html from frontend/
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/index.html'));
-});
+// Data structures
+const onlineUsers = new Set();
+const messagesByChannel = { general: [], random: [] };
+const typingUsers = new Set();
 
-// Ensure message file exists
-if (!fs.existsSync(MESSAGE_FILE)) {
-  fs.writeFileSync(MESSAGE_FILE, JSON.stringify([]));
-}
-
-// Load messages
-function loadMessages() {
-  const data = fs.readFileSync(MESSAGE_FILE);
-  const messages = JSON.parse(data);
-  return messages.map(m => typeof m === 'string' ? { username: 'Unknown', message: m } : m);
-}
-
-// Save messages
-function saveMessage(msgObj) {
-  const messages = loadMessages();
-  messages.push(msgObj);
-  fs.writeFileSync(MESSAGE_FILE, JSON.stringify(messages, null, 2));
-}
-
-io.on('connection', (socket) => {
-  console.log('A user connected');
-  socket.emit('chat history', loadMessages());
-
-  socket.on('chat message', (msgObj) => {
-    saveMessage(msgObj);
-    io.emit('chat message', msgObj);
+io.on('connection', socket => {
+  // New user
+  socket.on('new user', username => {
+    socket.username = username;
+    onlineUsers.add(username);
+    io.emit('update users', Array.from(onlineUsers));
   });
 
+  // Join channel
+  socket.on('join channel', channel => {
+    socket.join(channel);
+    if(!messagesByChannel[channel]) messagesByChannel[channel] = [];
+    socket.emit('chat history', messagesByChannel[channel]);
+  });
+
+  // Chat messages
+  socket.on('chat message', msgObj => {
+    const channel = msgObj.channel || 'general';
+    if(!messagesByChannel[channel]) messagesByChannel[channel] = [];
+    messagesByChannel[channel].push(msgObj);
+    io.to(channel).emit('chat message', msgObj);
+  });
+
+  // Typing
+  socket.on('typing', user => socket.broadcast.emit('typing', user));
+  socket.on('stop typing', user => socket.broadcast.emit('stop typing', user));
+
+  // Disconnect
   socket.on('disconnect', () => {
-    console.log('User disconnected');
+    if(socket.username) onlineUsers.delete(socket.username);
+    io.emit('update users', Array.from(onlineUsers));
   });
 });
 
-server.listen(PORT, '0.0.0.0', () => {
-  console.log(`✅ Server running on port ${PORT}`);
-});
+server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
