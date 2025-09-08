@@ -16,7 +16,7 @@ joinBtn.addEventListener('click', () => {
   chatDiv.style.display = 'block';
 
   socket = io();
-  socket.emit('join channel', currentChannel);
+  socket.emit('join channel', { channel: currentChannel, username });
   setupSocket();
 });
 
@@ -54,7 +54,7 @@ function setupSocket() {
     messages.scrollTop = messages.scrollHeight;
   }
 
-  // Socket events
+  // --- Socket events ---
   socket.on('chat history', history => {
     messages.innerHTML = '';
     history.forEach(addMessage);
@@ -76,6 +76,7 @@ function setupSocket() {
       const li = document.createElement('li');
       li.textContent = u;
       li.style.color = u === username ? '#fff' : '#b9bbbe';
+      li.style.fontSize = '14px'; // match channel titles
       li.style.position = 'relative';
       li.style.paddingLeft = '12px';
 
@@ -83,7 +84,7 @@ function setupSocket() {
       dot.style.width = '8px';
       dot.style.height = '8px';
       dot.style.borderRadius = '50%';
-      dot.style.background = '#43b581'; 
+      dot.style.background = '#43b581';
       dot.style.position = 'absolute';
       dot.style.left = '0';
       dot.style.top = '50%';
@@ -126,7 +127,7 @@ function setupSocket() {
       currentChannel = e.target.dataset.channel;
       document.querySelector('.chat-header').textContent = `# ${currentChannel}`;
       messages.innerHTML = '';
-      socket.emit('join channel', currentChannel);
+      socket.emit('join channel', { channel: currentChannel, username });
     }
   });
 }
