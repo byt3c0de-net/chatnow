@@ -31,6 +31,7 @@ function setupSocket() {
   const typingDiv = document.getElementById('typingIndicator');
   const userList = document.getElementById('userList');
   const channelList = document.getElementById('channelList');
+  const button = form.querySelector('button'); // Send button
 
   // Helper
   function getTime() {
@@ -94,20 +95,30 @@ function setupSocket() {
     });
   });
 
-  // Typing
+  // Typing + character limit
   input.addEventListener('input', () => {
     socket.emit('typing', username);
     clearTimeout(typingTimeout);
     typingTimeout = setTimeout(() => socket.emit('stop typing', username), 1000);
+
+    if (input.value.length > 1000) button.classList.add('too-long');
+    else button.classList.remove('too-long');
   });
 
-  // Send message
+  // Send message with character limit
   form.addEventListener('submit', e => {
     e.preventDefault();
     const message = input.value.trim();
     if (!message) return;
+
+    if (message.length > 1000) {
+      button.classList.add('too-long');
+      return; // prevent sending
+    }
+
     socket.emit('chat message', { username, message, channel: currentChannel, time: getTime() });
     input.value = '';
+    button.classList.remove('too-long');
   });
 
   // Channel switching
