@@ -7,7 +7,7 @@ const nodemailer = require('nodemailer');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'secret123';
 
-// Configure Nodemailer (example using Gmail)
+// Configure Nodemailer (Gmail)
 const transporter = nodemailer.createTransport({
   service: 'Gmail',
   auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS }
@@ -16,6 +16,8 @@ const transporter = nodemailer.createTransport({
 // Register
 router.post('/register', async (req, res) => {
   const { email, password } = req.body;
+  if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
+
   const existing = await User.findOne({ email });
   if (existing) return res.status(400).json({ error: 'Email already registered' });
 
@@ -26,7 +28,7 @@ router.post('/register', async (req, res) => {
   await user.save();
 
   await transporter.sendMail({
-    from: process.env.EMAIL_USER,
+    from: `"ChatNow" <${process.env.EMAIL_USER}>`,
     to: email,
     subject: 'ChatNow Verification Code',
     text: `Your verification code is: ${verificationCode}`
@@ -40,6 +42,7 @@ router.post('/verify', async (req, res) => {
   const { email, code } = req.body;
   const user = await User.findOne({ email });
   if (!user) return res.status(400).json({ error: 'User not found' });
+
   if (user.verificationCode !== code) return res.status(400).json({ error: 'Invalid code' });
 
   user.isVerified = true;
