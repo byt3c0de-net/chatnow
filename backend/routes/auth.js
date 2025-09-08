@@ -1,6 +1,6 @@
 // backend/routes/auth.js
 const express = require('express');
-const bcrypt = require('bcrypt'); // your package.json has "bcrypt"
+const bcrypt = require('bcryptjs'); // your package.json has "bcrypt"
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
