@@ -37,14 +37,23 @@ app.post('/register', async (req, res) => {
   if (!usernameRegex.test(username)) {
     return res.status(400).send('Username must be 3–14 characters, letters/numbers/_ only.');
   }
-  if (!password || password.length < 4) return res.status(400).send('Password must be at least 4 chars.');
+  if (!password || password.length < 4) {
+    return res.status(400).send('Password must be at least 4 characters.');
+  }
+
+  const normalized = username.toLowerCase();
 
   try {
     const hashed = await bcrypt.hash(password, 10);
-    await pool.query('INSERT INTO users (username, password) VALUES ($1, $2)', [username, hashed]);
+    await pool.query(
+      'INSERT INTO users (username, username_normalized, password) VALUES ($1, $2, $3)',
+      [username, normalized, hashed]
+    );
     res.send('Account created successfully!');
   } catch (err) {
-    if (err.code === '23505') return res.status(400).send('Username already taken.');
+    if (err.code === '23505') {
+      return res.status(400).send('Username already taken (case-insensitive).');
+    }
     console.error(err);
     res.status(500).send('Database error.');
   }
@@ -52,15 +61,20 @@ app.post('/register', async (req, res) => {
 
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;
+  const normalized = username.toLowerCase();
+
   try {
-    const { rows } = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
+    const { rows } = await pool.query(
+      'SELECT * FROM users WHERE username_normalized = $1',
+      [normalized]
+    );
     const user = rows[0];
     if (!user) return res.status(400).send('Invalid username or password.');
 
     const match = await bcrypt.compare(password, user.password);
     if (!match) return res.status(400).send('Invalid username or password.');
 
-    req.session.user = { id: user.id, username: user.username };
+    req.session.user = { id: user.id, username: user.username }; // keep original case for display
     res.send('Logged in successfully!');
   } catch (err) {
     console.error(err);
