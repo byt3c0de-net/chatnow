@@ -7,12 +7,20 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <!-- Auth (Register + Login) -->
   <div id="auth">
-    <h2>Enter your username</h2>
-    <input type="text" id="usernameInput" placeholder="Your name">
-    <button id="joinBtn">Join Chat</button>
+    <h2>Register</h2>
+    <input type="text" id="regUsername" placeholder="Choose a username">
+    <input type="password" id="regPassword" placeholder="Choose a password">
+    <button id="registerBtn">Register</button>
+
+    <h2>Login</h2>
+    <input type="text" id="loginUsername" placeholder="Your username">
+    <input type="password" id="loginPassword" placeholder="Your password">
+    <button id="loginBtn">Login</button>
   </div>
 
+  <!-- Chat -->
   <div id="chat" style="display:none;">
     <div class="app">
       <aside class="sidebar">
