@@ -12,7 +12,6 @@ let socket;
 registerBtn.addEventListener('click', async () => {
   const regUsername = document.getElementById('regUsername').value.trim();
   const regPassword = document.getElementById('regPassword').value;
-
   if (!regUsername || !regPassword) return alert('Enter username and password');
 
   const res = await fetch('/register', {
@@ -20,7 +19,6 @@ registerBtn.addEventListener('click', async () => {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ username: regUsername, password: regPassword })
   });
-
   alert(await res.text());
 });
 
@@ -28,7 +26,6 @@ registerBtn.addEventListener('click', async () => {
 loginBtn.addEventListener('click', async () => {
   const loginUsername = document.getElementById('loginUsername').value.trim();
   const loginPassword = document.getElementById('loginPassword').value;
-
   if (!loginUsername || !loginPassword) return alert('Enter username and password');
 
   const res = await fetch('/login', {
@@ -50,6 +47,7 @@ loginBtn.addEventListener('click', async () => {
   }
 });
 
+// ----------------- CHAT LOGIC -----------------
 function setupSocket() {
   const form = document.getElementById('form');
   const input = document.getElementById('input');
@@ -84,29 +82,18 @@ function setupSocket() {
     messages.scrollTop = messages.scrollHeight;
   }
 
-  // --- Socket events ---
-  socket.on('chat history', history => {
-    messages.innerHTML = '';
-    history.forEach(addMessage);
-  });
-
+  socket.on('chat history', history => { messages.innerHTML = ''; history.forEach(addMessage); });
   socket.on('chat message', addMessage);
-
-  socket.on('typing', user => { 
-    typingDiv.textContent = user !== username ? `${user} is typing...` : ''; 
-  });
-
+  socket.on('typing', user => { typingDiv.textContent = user !== username ? `${user} is typing...` : ''; });
   socket.on('stop typing', () => typingDiv.textContent = '');
-
   socket.on('update users', users => {
     userList.innerHTML = '';
     onlineCounter.textContent = `Online Users: ${users.length}`;
-
     users.forEach(u => {
       const li = document.createElement('li');
       li.textContent = u;
       li.style.color = u === username ? '#fff' : '#b9bbbe';
-      li.style.fontSize = '14px'; // match channel titles
+      li.style.fontSize = '14px';
       li.style.position = 'relative';
       li.style.paddingLeft = '12px';
 
@@ -125,12 +112,10 @@ function setupSocket() {
     });
   });
 
-  // Typing + 1000-char limit
   input.addEventListener('input', () => {
     socket.emit('typing', username);
     clearTimeout(typingTimeout);
     typingTimeout = setTimeout(() => socket.emit('stop typing', username), 1000);
-
     if (input.value.length > 1000) button.classList.add('too-long');
     else button.classList.remove('too-long');
   });
@@ -139,19 +124,12 @@ function setupSocket() {
     e.preventDefault();
     const message = input.value.trim();
     if (!message) return;
-
-    if (message.length > 1000) {
-      button.classList.add('too-long');
-      alert('Message cannot exceed 1000 characters.');
-      return;
-    }
-
+    if (message.length > 1000) { button.classList.add('too-long'); alert('Message cannot exceed 1000 chars.'); return; }
     socket.emit('chat message', { username, message, channel: currentChannel, time: getTime() });
     input.value = '';
     button.classList.remove('too-long');
   });
 
-  // Channel switching
   channelList.addEventListener('click', e => {
     if (e.target.tagName === 'LI') {
       currentChannel = e.target.dataset.channel;
