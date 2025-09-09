@@ -1,23 +1,53 @@
 const authDiv = document.getElementById('auth');
 const chatDiv = document.getElementById('chat');
-const usernameInput = document.getElementById('usernameInput');
-const joinBtn = document.getElementById('joinBtn');
+const registerBtn = document.getElementById('registerBtn');
+const loginBtn = document.getElementById('loginBtn');
 
 let username;
 let currentChannel = 'general';
 let typingTimeout;
 let socket;
 
-joinBtn.addEventListener('click', () => {
-  username = usernameInput.value.trim();
-  if (!username) return alert('Enter a name');
+// --- REGISTER ---
+registerBtn.addEventListener('click', async () => {
+  const regUsername = document.getElementById('regUsername').value.trim();
+  const regPassword = document.getElementById('regPassword').value;
 
-  authDiv.style.display = 'none';
-  chatDiv.style.display = 'block';
+  if (!regUsername || !regPassword) return alert('Enter username and password');
 
-  socket = io();
-  socket.emit('join channel', { channel: currentChannel, username });
-  setupSocket();
+  const res = await fetch('/register', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username: regUsername, password: regPassword })
+  });
+
+  alert(await res.text());
+});
+
+// --- LOGIN ---
+loginBtn.addEventListener('click', async () => {
+  const loginUsername = document.getElementById('loginUsername').value.trim();
+  const loginPassword = document.getElementById('loginPassword').value;
+
+  if (!loginUsername || !loginPassword) return alert('Enter username and password');
+
+  const res = await fetch('/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username: loginUsername, password: loginPassword })
+  });
+
+  if (res.ok) {
+    username = loginUsername;
+    authDiv.style.display = 'none';
+    chatDiv.style.display = 'block';
+
+    socket = io();
+    socket.emit('join channel', { channel: currentChannel, username });
+    setupSocket();
+  } else {
+    alert(await res.text());
+  }
 });
 
 function setupSocket() {
