@@ -1,12 +1,20 @@
-const sqlite3 = require('sqlite3').verbose();
-const db = new sqlite3.Database('./chatapp.db');
+// backend/db.js
+const { Pool } = require('pg');
 
-db.serialize(() => {
-  db.run(`CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT UNIQUE,
-    password TEXT
-  )`);
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false } // required for Render Postgres
 });
 
-module.exports = db;
+// Create table if not exists
+(async () => {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS users (
+      id SERIAL PRIMARY KEY,
+      username TEXT UNIQUE NOT NULL,
+      password TEXT NOT NULL
+    );
+  `);
+})();
+
+module.exports = pool;
