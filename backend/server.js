@@ -5,24 +5,13 @@ const { Server } = require('socket.io');
 const path = require('path');
 const session = require('express-session');
 const bcrypt = require('bcrypt');
-const sqlite3 = require('sqlite3').verbose();
+const pool = require('./db');
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: '*' } });
 
 const PORT = process.env.PORT || 3000;
-
-// ----------------- DATABASE -----------------
-const db = new sqlite3.Database('./chat.db');
-
-db.serialize(() => {
-  db.run(`CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT UNIQUE NOT NULL,
-    password TEXT NOT NULL
-  )`);
-});
 
 // ----------------- MIDDLEWARE -----------------
 app.use(express.json());
@@ -40,45 +29,32 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/index.html'));
 });
 
-// ----------------- AUTH ENDPOINTS -----------------
-
-// Register new account
+// ----------------- AUTH -----------------
 app.post('/register', async (req, res) => {
   const { username, password } = req.body;
 
-  // Username validation
   const usernameRegex = /^[A-Za-z0-9_]{3,14}$/;
   if (!usernameRegex.test(username)) {
-    return res.status(400).send('Username must be 3–14 characters, only letters, numbers, or underscore.');
+    return res.status(400).send('Username must be 3–14 characters, letters/numbers/_ only.');
   }
+  if (!password || password.length < 4) return res.status(400).send('Password must be at least 4 chars.');
 
-  if (!password || password.length < 4) {
-    return res.status(400).send('Password must be at least 4 characters.');
+  try {
+    const hashed = await bcrypt.hash(password, 10);
+    await pool.query('INSERT INTO users (username, password) VALUES ($1, $2)', [username, hashed]);
+    res.send('Account created successfully!');
+  } catch (err) {
+    if (err.code === '23505') return res.status(400).send('Username already taken.');
+    console.error(err);
+    res.status(500).send('Database error.');
   }
-
-  const hashed = await bcrypt.hash(password, 10);
-
-  db.run(
-    'INSERT INTO users (username, password) VALUES (?, ?)',
-    [username, hashed],
-    function (err) {
-      if (err) {
-        if (err.message.includes('UNIQUE')) {
-          return res.status(400).send('Username already taken.');
-        }
-        return res.status(500).send('Database error.');
-      }
-      res.send('Account created successfully!');
-    }
-  );
 });
 
-// Login
-app.post('/login', (req, res) => {
+app.post('/login', async (req, res) => {
   const { username, password } = req.body;
-
-  db.get('SELECT * FROM users WHERE username = ?', [username], async (err, user) => {
-    if (err) return res.status(500).send('Database error.');
+  try {
+    const { rows } = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
+    const user = rows[0];
     if (!user) return res.status(400).send('Invalid username or password.');
 
     const match = await bcrypt.compare(password, user.password);
@@ -86,21 +62,22 @@ app.post('/login', (req, res) => {
 
     req.session.user = { id: user.id, username: user.username };
     res.send('Logged in successfully!');
-  });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Database error.');
+  }
 });
 
-// Get current user
 app.get('/me', (req, res) => {
   if (!req.session.user) return res.status(401).send('Not logged in.');
   res.json(req.session.user);
 });
 
-// Logout
 app.post('/logout', (req, res) => {
   req.session.destroy(() => res.send('Logged out.'));
 });
 
-// ----------------- CHAT SYSTEM -----------------
+// ----------------- CHAT -----------------
 const messagesByChannel = { general: [], random: [] };
 const onlineUsers = {};
 
@@ -112,10 +89,7 @@ io.on('connection', socket => {
     onlineUsers[socket.id] = username;
     socket.join(channel);
 
-    // Send chat history
     socket.emit('chat history', messagesByChannel[channel] || []);
-
-    // Update users
     io.emit('update users', Object.values(onlineUsers));
   });
 
@@ -125,6 +99,9 @@ io.on('connection', socket => {
     messagesByChannel[channel].push(msg);
     io.to(channel).emit('chat message', msg);
   });
+
+  socket.on('typing', user => socket.broadcast.emit('typing', user));
+  socket.on('stop typing', user => socket.broadcast.emit('stop typing', user));
 
   socket.on('disconnect', () => {
     delete onlineUsers[socket.id];
