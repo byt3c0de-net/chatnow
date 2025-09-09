@@ -61,3 +61,89 @@ form { display: flex; padding: 15px; border-top: 1px solid #202225; background: 
 button { margin-left: 10px; padding: 0 20px; border: none; border-radius: 6px; background: #5865f2; color: #fff; cursor: pointer; }
 button:hover { background: #4752c4; }
 button.too-long { background: #d83c3e; }
+
+/* ---------------- RESPONSIVE ---------------- */
+@media (max-width: 768px) {
+  .app {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+    overflow-x: auto;
+  }
+
+  .sidebar h2 {
+    font-size: 16px;
+    margin: 0 10px 0 0;
+  }
+
+  .channel-list, .user-list {
+    display: flex;
+    gap: 10px;
+    flex-direction: row;
+  }
+
+  .channel-list li, .user-list li {
+    font-size: 13px;
+    padding: 6px 10px;
+    white-space: nowrap;
+  }
+
+  .chat-container {
+    flex-grow: 1;
+    width: 100%;
+  }
+
+  .chat-header {
+    font-size: 14px;
+    padding: 10px;
+  }
+
+  #messages {
+    padding: 10px;
+  }
+
+  form {
+    padding: 10px;
+  }
+
+  #input {
+    font-size: 13px;
+    padding: 8px;
+  }
+
+  button {
+    padding: 0 12px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .sidebar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+
+  .channel-list, .user-list {
+    flex-wrap: wrap;
+  }
+
+  .chat-header {
+    font-size: 13px;
+  }
+
+  #input {
+    font-size: 12px;
+  }
+
+  button {
+    font-size: 12px;
+    padding: 0 10px;
+  }
+}
