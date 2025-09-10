@@ -41,19 +41,23 @@ app.post('/register', async (req, res) => {
     return res.status(400).send('Password must be at least 4 characters.');
   }
 
-  const normalized = username.toLowerCase();
-
   try {
+    // Check if username exists case-insensitive
+    const { rows } = await pool.query(
+      'SELECT 1 FROM users WHERE LOWER(username) = LOWER($1)',
+      [username]
+    );
+    if (rows.length > 0) {
+      return res.status(400).send('Username already taken (case-insensitive).');
+    }
+
     const hashed = await bcrypt.hash(password, 10);
     await pool.query(
-      'INSERT INTO users (username, username_normalized, password) VALUES ($1, $2, $3)',
-      [username, normalized, hashed]
+      'INSERT INTO users (username, password) VALUES ($1, $2)',
+      [username, hashed]
     );
     res.send('Account created successfully!');
   } catch (err) {
-    if (err.code === '23505') {
-      return res.status(400).send('Username already taken (case-insensitive).');
-    }
     console.error(err);
     res.status(500).send('Database error.');
   }
@@ -61,12 +65,11 @@ app.post('/register', async (req, res) => {
 
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;
-  const normalized = username.toLowerCase();
 
   try {
     const { rows } = await pool.query(
-      'SELECT * FROM users WHERE username_normalized = $1',
-      [normalized]
+      'SELECT * FROM users WHERE LOWER(username) = LOWER($1)',
+      [username]
     );
     const user = rows[0];
     if (!user) return res.status(400).send('Invalid username or password.');
@@ -74,7 +77,7 @@ app.post('/login', async (req, res) => {
     const match = await bcrypt.compare(password, user.password);
     if (!match) return res.status(400).send('Invalid username or password.');
 
-    req.session.user = { id: user.id, username: user.username }; // keep original case for display
+    req.session.user = { id: user.id, username: user.username }; // preserve original case
     res.send('Logged in successfully!');
   } catch (err) {
     console.error(err);
