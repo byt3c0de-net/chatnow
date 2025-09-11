@@ -1,0 +1,13 @@
+{
+  "background_color": "#ffffff",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "ChatNow",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "ChatNow",
+  "start_url": "https://chatnow-exix.onrender.com/",
+  "theme_color": "#ffffff",
+  "id": "chat.now",
+  "description": "DESC"
+}
